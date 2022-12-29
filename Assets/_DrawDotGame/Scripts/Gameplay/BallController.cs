@@ -6,6 +6,10 @@ namespace DrawDotGame
     public class BallController : MonoBehaviour
     {
         [SerializeField] private Color particleColor;
+        [SerializeField] private SpriteRenderer face;
+        [SerializeField] private Sprite idleFace;
+        [SerializeField] private Sprite happyFace;
+        [SerializeField] private Sprite sadFace;
         private GameManager gameManager;
         private Rigidbody2D rigid2D;
 
@@ -13,6 +17,7 @@ namespace DrawDotGame
         {
             gameManager = FindObjectOfType<GameManager>();
             rigid2D = GetComponent<Rigidbody2D>();
+            face.sprite = idleFace;
         }
 
         // Update is called once per frame
@@ -40,6 +45,10 @@ namespace DrawDotGame
                     rigid2D.isKinematic = true;
                     gameManager.GameOver();
                 }
+            }
+            else
+            {
+                face.sprite = sadFace;
             }
         }
 
@@ -78,6 +87,8 @@ namespace DrawDotGame
             {
                 if (col.gameObject.CompareTag("Ball"))
                 {
+                    face.sprite = happyFace;
+                    col.gameObject.GetComponent<BallController>().face.sprite = happyFace;
                     gameManager.Win();
 
                     Vector3 thisPos = this.transform.position;

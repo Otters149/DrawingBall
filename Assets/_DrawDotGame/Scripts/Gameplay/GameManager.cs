@@ -91,6 +91,10 @@ namespace DrawDotGame
         public string failedScreenshotName = "failedLevel.png";
 
         [Header("Gameplay Config")]
+        [SerializeField]
+        private float penWidth;
+        [SerializeField]
+        private float LineMassMax;
         [Tooltip("The color of the drawn lines")]
         public Color lineColor;
         public Material lineMaterial;
@@ -111,10 +115,11 @@ namespace DrawDotGame
         private Rigidbody2D blueBallRigid;
         private bool stopHolding;
         private bool allowDrawing = true;
+        private float totalLength;
 
         private List<Rigidbody2D> listObstacleNonKinematic = new List<Rigidbody2D>();
         private GameObject[] obstacles;
-
+        private readonly float STEP_MASS = 0.001f;
 
         void Start()
         {
@@ -261,6 +266,7 @@ namespace DrawDotGame
                         }
                         stopHolding = false;
                         listPoint.Clear();
+                        totalLength = 0f;
                         CreateLine(Input.mousePosition);
                     }
                 }
@@ -269,16 +275,38 @@ namespace DrawDotGame
                     Vector2 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
                     if (!listPoint.Contains(mousePos))
                     {
+                        bool isOverlap = false;
                         //Add mouse pos, set vertex and position for line renderer
                         listPoint.Add(mousePos);
-                        currentLineRenderer.positionCount = listPoint.Count;
-                        currentLineRenderer.SetPosition(listPoint.Count - 1, listPoint[listPoint.Count - 1]);
+
+                        if (listPoint.Count == 1)
+                        {
+                            Vector2 point_1 = mousePos;
+                            Vector2 point_2 = point_1 + Vector2.down * penWidth / 100;
+
+                            currentLineRenderer.positionCount = 2;
+                            currentLineRenderer.SetPosition(0, point_1);
+                            currentLineRenderer.SetPosition(1, point_2);
+
+                            currentColliderObject = new GameObject("Collider");
+                            currentColliderObject.transform.position = (point_1 + point_2) / 2;
+                            currentColliderObject.transform.right = (point_2 - point_1).normalized;
+                            currentColliderObject.transform.SetParent(currentLine.transform);
+
+                            var circleCollider = currentColliderObject.AddComponent<CircleCollider2D>();
+                            circleCollider.radius = penWidth / 2;
+                            circleCollider.enabled = false;
+                        }
+
 
                         //Create collider
                         if (listPoint.Count >= 2)
                         {
                             Vector2 point_1 = listPoint[listPoint.Count - 2];
                             Vector2 point_2 = listPoint[listPoint.Count - 1];
+
+                            Vector2 length = point_1 - point_2;
+                            totalLength += Mathf.Sqrt(length.x * length.x + length.y * length.y);
 
                             currentColliderObject = new GameObject("Collider");
                             currentColliderObject.transform.position = (point_1 + point_2) / 2;
@@ -313,32 +341,41 @@ namespace DrawDotGame
                                                 ((hit_2.collider != null) ? (hit_2.collider.gameObject) : (hit_3.collider.gameObject));
                                 if (currentColliderObject.transform.parent != hit.transform.parent)
                                 {
+                                    isOverlap = true;
                                     Destroy(currentBoxCollider2D.gameObject);
-                                    currentLineRenderer.positionCount = (listPoint.Count - 1);
-                                    listPoint.Remove(listPoint[listPoint.Count - 1]);
-                                    if (pinkBallRigid.isKinematic)
-                                        pinkBallRigid.isKinematic = false;
-                                    if (blueBallRigid.isKinematic)
-                                        blueBallRigid.isKinematic = false;
+                                    //currentLineRenderer.positionCount = (listPoint.Count - 1);
+                                    listPoint.RemoveAt(listPoint.Count - 1);
+                                    //if (pinkBallRigid.isKinematic)
+                                    //    pinkBallRigid.isKinematic = false;
+                                    //if (blueBallRigid.isKinematic)
+                                    //    blueBallRigid.isKinematic = false;
 
-                                    for (int i = 0; i < currentLine.transform.childCount; i++)
-                                    {
-                                        currentLine.transform.GetChild(i).GetComponent<BoxCollider2D>().enabled = true;
-                                    }
+                                    //for (int i = 0; i < currentLine.transform.childCount; i++)
+                                    //{
+                                    //    currentLine.transform.GetChild(i).GetComponent<BoxCollider2D>().enabled = true;
+                                    //}
 
-                                    if (mode == Mode.LevelEditorMode)
-                                    {
-                                        levelManager.listLineRendererPos = listPoint;
-                                    }
+                                    //if (mode == Mode.LevelEditorMode)
+                                    //{
+                                    //    levelManager.listLineRendererPos = listPoint;
+                                    //}
 
-                                    listLine.Add(currentLine);
-                                    currentLine.AddComponent<Rigidbody2D>().useAutoMass = true;
-                                    foreach (Rigidbody2D rigid in listObstacleNonKinematic)
-                                    {
-                                        rigid.isKinematic = false;
-                                    }
-                                    stopHolding = true;
+                                    //listLine.Add(currentLine);
+                                    ////currentLine.AddComponent<Rigidbody2D>().useAutoMass = true;
+                                    //currentLine.AddComponent<Rigidbody2D>().useAutoMass = false;
+                                    //currentLine.GetComponent<Rigidbody2D>().mass = LineMass;
+                                    //foreach (Rigidbody2D rigid in listObstacleNonKinematic)
+                                    //{
+                                    //    rigid.isKinematic = false;
+                                    //}
+                                    //stopHolding = true;
                                 }
+                            }
+
+                            if (!isOverlap)
+                            {
+                                currentLineRenderer.positionCount = listPoint.Count;
+                                currentLineRenderer.SetPosition(listPoint.Count - 1, listPoint[listPoint.Count - 1]);
                             }
                         }
                     }
@@ -359,10 +396,19 @@ namespace DrawDotGame
                     {
                         for (int i = 0; i < currentLine.transform.childCount; i++)
                         {
-                            currentLine.transform.GetChild(i).GetComponent<BoxCollider2D>().enabled = true;
+                            currentLine.transform.GetChild(i).GetComponent<Collider2D>().enabled = true;
                         }
                         listLine.Add(currentLine);
-                        currentLine.AddComponent<Rigidbody2D>().useAutoMass = true;
+                        currentLine.AddComponent<Rigidbody2D>().useAutoMass = false;
+                        if (currentLine.transform.childCount == 1)
+                        {
+                            currentLine.GetComponent<Rigidbody2D>().mass = STEP_MASS;
+                        }
+                        else
+                        {
+                            float mass = Mathf.Min(LineMassMax, totalLength / penWidth * STEP_MASS * 20);
+                            currentLine.GetComponent<Rigidbody2D>().mass = mass;
+                        }
                     }
                     else
                     {
@@ -382,16 +428,17 @@ namespace DrawDotGame
         {
             currentLine = new GameObject("Line");
             currentLineRenderer = currentLine.AddComponent<LineRenderer>();
-            //currentLineRenderer.material = new Material(Shader.Find("Standard"));
-            //currentLineRenderer.material.EnableKeyword("_EMISSION");
-            //currentLineRenderer.material.SetColor("_EmissionColor", lineColor);
+            currentLineRenderer.material = new Material(Shader.Find("Standard"));
+            currentLineRenderer.material.EnableKeyword("_EMISSION");
+            currentLineRenderer.material.SetColor("_EmissionColor", lineColor);
             currentLineRenderer.sharedMaterial = lineMaterial;
             currentLineRenderer.positionCount = 0;
-            currentLineRenderer.startWidth = 0.1f;
-            currentLineRenderer.endWidth = 0.1f;
+            currentLineRenderer.startWidth = penWidth;
+            currentLineRenderer.endWidth = penWidth;
             currentLineRenderer.startColor = lineColor;
             currentLineRenderer.endColor = lineColor;
             currentLineRenderer.useWorldSpace = false;
+            currentLineRenderer.numCapVertices = 6;
         }
 
         public void StopAllPhysics()
