@@ -36,9 +36,12 @@ namespace DrawDotGame
 
         private Animator menuAnimator;
 
+        private Coroutine adsCoroutine;
         // Use this for initialization
         void Start()
         {
+            adsCoroutine = StartCoroutine(ShowBanner());
+
             if (firstStart && showSplashScreen)
             {
                 firstStart = false;
@@ -67,6 +70,8 @@ namespace DrawDotGame
                 btnSwitch.gameObject.SetActive(true);
                 levelPackScrollview.SetActive(false);
             }
+
+            
         }
 
         // Update is called once per frame
@@ -75,6 +80,24 @@ namespace DrawDotGame
             heartNumber.text = CoinManager.Instance.Coins.ToString();
             UpdateSoundButtons();
             UpdateMusicButtons();
+        }
+
+        void OnDestroy()
+        {
+            if (adsCoroutine != null)
+            {
+                StopCoroutine(adsCoroutine);
+            }
+
+            AdsManager.Instance.CloseBanner();
+        }
+
+        IEnumerator ShowBanner()
+        {
+            yield return new WaitUntil(() => AdsManager.Instance != null && AdsManager.Instance.Initialized && AdsManager.Instance.BannerAvailable);
+            JFLog.Info(JFLog.LogTag.ADS, "Start Show Banner Ad");
+            AdsManager.Instance.ShowBanner(Vungle.VungleBannerPosition.BottomCenter);
+            adsCoroutine = null;
         }
 
         IEnumerator CRHideSplashScreen(float delay)

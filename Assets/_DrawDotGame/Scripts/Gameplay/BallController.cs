@@ -42,6 +42,8 @@ namespace DrawDotGame
                 Destroy(particle.gameObject, particle.startLifetime);
 #endif
                     gameObject.GetComponent<SpriteRenderer>().enabled = false;
+                    gameObject.GetComponent<Collider2D>().enabled = false;
+                    face.gameObject.SetActive(false);
                     rigid2D.isKinematic = true;
                     gameManager.GameOver();
                 }
@@ -75,6 +77,8 @@ namespace DrawDotGame
                 Destroy(particle.gameObject, particle.startLifetime);
 #endif
                     gameObject.GetComponent<SpriteRenderer>().enabled = false;
+                    face.gameObject.SetActive(false);
+                    gameObject.GetComponent<Collider2D>().enabled = false;
                     rigid2D.isKinematic = true;
                     gameManager.GameOver();
                 }
@@ -122,6 +126,8 @@ namespace DrawDotGame
                         Destroy(particle.gameObject, particle.startLifetime);
 #endif
                             gameObject.GetComponent<SpriteRenderer>().enabled = false;
+                            gameObject.GetComponent<Collider2D>().enabled = false;
+                            face.gameObject.SetActive(false);
                             rigid2D.isKinematic = true;
                             gameManager.GameOver();
                         }

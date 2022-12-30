@@ -48,7 +48,7 @@ namespace DrawDotGame
         public void Reset()
         {
             // Initialize coins
-            Coins = PlayerPrefs.GetInt(PPK_COINS, initialCoins);
+            Coins = JFLocalSave.Instance.GetInt(PPK_COINS, initialCoins);
         }
 
         public void AddCoins(int amount)
@@ -57,7 +57,7 @@ namespace DrawDotGame
 
 
             // Store new coin value
-            PlayerPrefs.SetInt(PPK_COINS, Coins);
+            JFLocalSave.Instance.SetInt(PPK_COINS, Coins);
 
             // Fire event
             CoinsUpdated(Coins);
@@ -68,7 +68,7 @@ namespace DrawDotGame
             Coins -= amount;
 
             // Store new coin value
-            PlayerPrefs.SetInt(PPK_COINS, Coins);
+            JFLocalSave.Instance.SetInt(PPK_COINS, Coins);
 
             // Fire event
             CoinsUpdated(Coins);

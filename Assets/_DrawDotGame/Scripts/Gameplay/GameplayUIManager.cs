@@ -236,14 +236,16 @@ namespace DrawDotGame
         {
             if (gameManager.ShowHint())
             {
-                if (PlayerPrefs.GetInt(HINT_ALERT_PPKEY, -99) == -99)
+                //if (PlayerPrefs.GetInt(HINT_ALERT_PPKEY, -99) == -99)
+                if (JFLocalSave.Instance.GetInt(HINT_ALERT_PPKEY, -99) == -99)
                 {
                     // Show hint alert.
                     hintAlert.SetActive(true);
                     hintAlert.GetComponentInChildren<Animator>().Play(showMenuPanel.name);
 
                     // Overwrite pp key.
-                    PlayerPrefs.SetInt(HINT_ALERT_PPKEY, 1);
+                    //PlayerPrefs.SetInt(HINT_ALERT_PPKEY, 1);
+                    JFLocalSave.Instance.SetInt(HINT_ALERT_PPKEY, 1);
                 }
                 btnHint.gameObject.SetActive(false);
             }

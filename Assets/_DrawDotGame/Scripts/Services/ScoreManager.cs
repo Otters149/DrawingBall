@@ -44,7 +44,7 @@ namespace DrawDotGame
             Score = 0;
 
             // Initialize highscore
-            HighScore = PlayerPrefs.GetInt(HIGHSCORE, 0);
+            HighScore = JFLocalSave.Instance.GetInt(HIGHSCORE, 0);
             HasNewHighScore = false;
         }
 
@@ -72,7 +72,7 @@ namespace DrawDotGame
             if (newHighScore > HighScore)
             {
                 HighScore = newHighScore;
-                PlayerPrefs.SetInt(HIGHSCORE, HighScore);
+                JFLocalSave.Instance.SetInt(HIGHSCORE, HighScore);
                 HighscoreUpdated(HighScore);
             }
         }

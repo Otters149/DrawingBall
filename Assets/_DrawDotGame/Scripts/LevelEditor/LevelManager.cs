@@ -299,10 +299,10 @@ namespace DrawDotGame
         //Check the given level is solved or not
         public static bool IsLevelSolved(int levelNumber)
         {
-            string data = PlayerPrefs.GetString(LEVELSOLVED_KEY, string.Empty);
+            string data = JFLocalSave.Instance.GetString(LEVELSOLVED_KEY, string.Empty);
             if (!string.IsNullOrEmpty(data))
             {
-                string[] dataSplited = PlayerPrefs.GetString(LEVELSOLVED_KEY).Split('_');
+                string[] dataSplited = JFLocalSave.Instance.GetString(LEVELSOLVED_KEY).Split('_');
                 for (int i = 0; i < dataSplited.Length; i++)
                 {
                     if (dataSplited[i].Equals(levelNumber.ToString()))
@@ -317,7 +317,7 @@ namespace DrawDotGame
         {
             if (!IsLevelSolved(level))
             {
-                string data = PlayerPrefs.GetString(LEVELSOLVED_KEY);
+                string data = JFLocalSave.Instance.GetString(LEVELSOLVED_KEY);
                 string newData;
                 if (string.IsNullOrEmpty(data))
                 {
@@ -325,9 +325,9 @@ namespace DrawDotGame
                 }
                 else
                 {
-                    newData = PlayerPrefs.GetString(LEVELSOLVED_KEY) + "_" + level.ToString();
+                    newData = JFLocalSave.Instance.GetString(LEVELSOLVED_KEY) + "_" + level.ToString();
                 }
-                PlayerPrefs.SetString(LEVELSOLVED_KEY, newData);
+                JFLocalSave.Instance.SetString(LEVELSOLVED_KEY, newData);
             }
         }
 

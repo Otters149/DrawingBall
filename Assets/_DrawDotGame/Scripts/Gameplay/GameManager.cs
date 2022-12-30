@@ -64,14 +64,16 @@ namespace DrawDotGame
             {
                 if (levelLoaded == -1)
                 {
-                    levelLoaded = PlayerPrefs.GetInt(LAST_SELECTED_LEVEL_KEY, 0);
+                    //levelLoaded = PlayerPrefs.GetInt(LAST_SELECTED_LEVEL_KEY, 0);
+                    levelLoaded = JFLocalSave.Instance.GetInt(LAST_SELECTED_LEVEL_KEY, 0);
                 }
                 return levelLoaded;
             }
             set
             {
                 levelLoaded = value;
-                PlayerPrefs.SetInt(LAST_SELECTED_LEVEL_KEY, levelLoaded);
+                //PlayerPrefs.SetInt(LAST_SELECTED_LEVEL_KEY, levelLoaded);
+                JFLocalSave.Instance.SetInt(LAST_SELECTED_LEVEL_KEY, levelLoaded);
             }
         }
 
@@ -135,6 +137,12 @@ namespace DrawDotGame
                     LevelData levelData = JsonUtility.FromJson<LevelData>(o);
                     if (levelData.levelNumber == LevelLoaded)
                     {
+                        if (JFLocalSave.Instance.GetInt("LEVEL_HAS_ADS", 3) == LevelLoaded)
+                        {
+                            JFLocalSave.Instance.SetInt("LEVEL_HAS_ADS", LevelLoaded + 2);
+                            AdsManager.Instance.ShowInterstitial();
+                        }
+
                         CreateLevel(levelData);
                         GameState = GameState.Playing;
                         break;
@@ -296,6 +304,37 @@ namespace DrawDotGame
                             var circleCollider = currentColliderObject.AddComponent<CircleCollider2D>();
                             circleCollider.radius = penWidth / 2;
                             circleCollider.enabled = false;
+
+                            Vector2 rayDirection = currentColliderObject.transform.TransformDirection(Vector2.right);
+
+                            Vector2 pointDir = currentColliderObject.transform.TransformDirection(Vector2.up);
+
+                            Vector2 rayPoint_1 = (Vector2)currentColliderObject.transform.position + (-rayDirection) * (circleCollider.radius);
+
+                            Vector2 rayPoint_2 = ((Vector2)currentColliderObject.transform.position + pointDir * (circleCollider.radius / 2f))
+                                                 + ((-rayDirection) * (circleCollider.radius));
+
+                            Vector2 rayPoint_3 = ((Vector2)currentColliderObject.transform.position + (-pointDir) * (circleCollider.radius / 2f))
+                                                 + ((-rayDirection) * (circleCollider.radius));
+
+                            float rayLength = ((Vector2)Camera.main.ScreenToWorldPoint(Input.mousePosition) - rayPoint_1).magnitude;
+                            RaycastHit2D hit_1 = Physics2D.Raycast(rayPoint_1, rayDirection, rayLength);
+                            RaycastHit2D hit_2 = Physics2D.Raycast(rayPoint_2, rayDirection, rayLength);
+                            RaycastHit2D hit_3 = Physics2D.Raycast(rayPoint_3, rayDirection, rayLength);
+
+                            if (hit_1.collider != null || hit_2.collider != null || hit_3.collider != null)
+                            {
+                                GameObject hit = (hit_1.collider != null) ? (hit_1.collider.gameObject) :
+                                                ((hit_2.collider != null) ? (hit_2.collider.gameObject) : (hit_3.collider.gameObject));
+                                if (currentColliderObject.transform.parent != hit.transform.parent)
+                                {
+                                    isOverlap = true;
+                                    Destroy(circleCollider.gameObject);
+                                    listPoint.RemoveAt(listPoint.Count - 1);
+                                    currentLineRenderer.positionCount = 0;
+                                    allowDrawing = false;
+                                }
+                            }
                         }
 
 
@@ -428,9 +467,9 @@ namespace DrawDotGame
         {
             currentLine = new GameObject("Line");
             currentLineRenderer = currentLine.AddComponent<LineRenderer>();
-            currentLineRenderer.material = new Material(Shader.Find("Standard"));
-            currentLineRenderer.material.EnableKeyword("_EMISSION");
-            currentLineRenderer.material.SetColor("_EmissionColor", lineColor);
+            //currentLineRenderer.material = new Material(Shader.Find("Standard"));
+            //currentLineRenderer.material.EnableKeyword("_EMISSION");
+            //currentLineRenderer.material.SetColor("_EmissionColor", lineColor);
             currentLineRenderer.sharedMaterial = lineMaterial;
             currentLineRenderer.positionCount = 0;
             currentLineRenderer.startWidth = penWidth;
@@ -489,6 +528,7 @@ namespace DrawDotGame
         {
             // Only show hint if there's enough hearts
             if (CoinManager.Instance.Coins >= heartsPerHint)
+            //if (HintManager.Instance.Hints > 0)
             {
                 string path = LevelScroller.JSON_PATH;
                 TextAsset textAsset = Resources.Load<TextAsset>(path);
@@ -504,6 +544,8 @@ namespace DrawDotGame
 
                         // Remove hearts
                         CoinManager.Instance.RemoveCoins(heartsPerHint);
+
+                        //HintManager.Instance.RemoveHints(1);
 
                         return true;
                     }

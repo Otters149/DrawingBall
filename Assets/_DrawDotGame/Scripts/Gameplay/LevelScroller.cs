@@ -40,7 +40,8 @@ namespace DrawDotGame
             data = textAsset.ToString().Split(';');
 
             //Get level solved data
-            string[] levelSolvedData = PlayerPrefs.GetString(LevelManager.LEVELSOLVED_KEY).Split('_');
+            //string[] levelSolvedData = PlayerPrefs.GetString(LevelManager.LEVELSOLVED_KEY).Split('_');
+            string[] levelSolvedData = JFLocalSave.Instance.GetString(LevelManager.LEVELSOLVED_KEY).Split('_');
             int highestLevelSolved;
 
             //Find the highest level that solved
@@ -268,11 +269,13 @@ namespace DrawDotGame
             #endregion
 
             // Check if a new pack has been unlocked
-            int oldMaxUnlockedLevel = PlayerPrefs.GetInt(MAX_UNLOCKED_LEVEL_PPK, LEVELS_PER_PACK);  // first pack's levels are unlocked from beginning
+            //int oldMaxUnlockedLevel = PlayerPrefs.GetInt(MAX_UNLOCKED_LEVEL_PPK, LEVELS_PER_PACK);  // first pack's levels are unlocked from beginning
+            int oldMaxUnlockedLevel = JFLocalSave.Instance.GetInt(MAX_UNLOCKED_LEVEL_PPK, LEVELS_PER_PACK);  // first pack's levels are unlocked from beginning
 
             if (maxUnlockedLevel > oldMaxUnlockedLevel)
             {
-                PlayerPrefs.SetInt(MAX_UNLOCKED_LEVEL_PPK, maxUnlockedLevel);
+                //PlayerPrefs.SetInt(MAX_UNLOCKED_LEVEL_PPK, maxUnlockedLevel);
+                JFLocalSave.Instance.SetInt(MAX_UNLOCKED_LEVEL_PPK, maxUnlockedLevel);
             }
 
             //BetterScrollview packScroller = levelPackScrollview.GetComponent<BetterScrollview>();

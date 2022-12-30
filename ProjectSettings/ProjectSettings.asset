@@ -162,7 +162,7 @@ PlayerSettings:
     iPhone: 0
     tvOS: 0
   overrideDefaultApplicationIdentifier: 1
-  AndroidBundleVersionCode: 22122802
+  AndroidBundleVersionCode: 22123008
   AndroidMinSdkVersion: 22
   AndroidTargetSdkVersion: 31
   AndroidPreferredInstallLocation: 1
@@ -669,7 +669,7 @@ PlayerSettings:
   webGLThreadsSupport: 0
   webGLDecompressionFallback: 0
   scriptingDefineSymbols:
-    Android: _PRODUCTION;PRODUCTION
+    Android: _PRODUCTION;_DEBUG;_CHEAT_ENABLE
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
